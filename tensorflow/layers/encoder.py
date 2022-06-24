@@ -14,9 +14,9 @@ class Encoder(Layer):
         self.bi_lstm1 = Bidirectional(LSTM(units=self.config.units1, return_sequences=True))
         self.bi_lstm2 = Bidirectional(LSTM(units=self.config.units2, return_sequences=True))
     
-    def call(self, input, training=None):
+    def call(self, inputs, training=None):
         # CNN
-        x = self.conv1(input)
+        x = self.conv1(inputs)
         x = self.max_pooling(x)
 
         # LSTM
