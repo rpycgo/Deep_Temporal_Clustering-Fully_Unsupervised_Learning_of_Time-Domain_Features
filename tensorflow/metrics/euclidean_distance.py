@@ -8,8 +8,8 @@ class EuclideanDistance(Metric):
         self.distance = None
 
     def update_state(self, inputs, centroids):
-        x = tf.expand_dims(inputs, axis=1)  # batch_size, 1, time_seq, n_features
-        self.distance = tf.math.reduce_sum(tf.math.sqrt(tf.math.reduce_sum(tf.math.square(x - centroids), axis=2)), axis=-1)    # batch_size, k, time_seq, n_features
+        x = x[:, :, :, tf.newaxis]  # batch_size, time_seq, n_features, 1
+        self.distance = tf.math.reduce_sum(tf.math.sqrt(tf.math.reduce_sum(tf.math.square(x - centroids), axis=1)), axis=1)    # batch_size, time_seq, n_features, k -> # batch_size, k
 
     def result(self):
         return self.distance
