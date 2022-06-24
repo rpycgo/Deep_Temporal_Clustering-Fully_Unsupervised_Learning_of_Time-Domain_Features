@@ -18,11 +18,11 @@ class CorrelationBasedSimilarity(Metric):
 
     def update_state(self, inputs, centroids):
         x = self._error(inputs) # batch_size, time_seq, n_features
-        x = x[:, tf.newaxis, :, :]  # batch_size, 1, time_seq, n_features
-        centers = self._error(centroids)    # batch_size, k, time_seq, n_features
+        x = x[:, :, :, tf.newaxis]  # batch_size, time_seq, n_features, 1
+        centers = self._error(centroids)    # batch_size, time_seq, n_features, k
 
-        p = tf.reduce_mean(x * centers / (self._std(x) * self._std(centers)), axis=2)   # batch_size, k, n_features
-        self.distance = tf.reduce_sum(tf.math.sqrt(2 * (1-p)), axis=-1) # batch_size, k
+        p = tf.reduce_mean(x * centers / (self._std(x) * self._std(centers)), axis=1)   # batch_size, n_features, k
+        self.distance = tf.reduce_sum(tf.math.sqrt(2 * (1-p)), axis=1) # batch_size, k
 
     def result(self):
         return self.distance
