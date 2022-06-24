@@ -22,6 +22,7 @@ class TemporalAutoencoder(Model):
 
 def build_temporal_autoencoder(config=model_config):
     inputs = Input(shape=(config.time_seq, config.n_features))
+    encoder_output = Encoder(config)(input)
     output = TemporalAutoencoder(config)(inputs)
 
-    return Model(inputs, output)
+    return Model(inputs, [encoder_output, output])
