@@ -6,6 +6,7 @@ import tensorflow as tf
 from tensorflow.keras.layers import Input
 from tensorflow.keras.models import Model
 from tensorflow.keras.metrics import MeanSquaredError
+from tensorflow.keras.losses import KLDivergence
 
 
 class DeepTemporalClustering(Model):
@@ -16,7 +17,8 @@ class DeepTemporalClustering(Model):
         self.decoder = self.temporal_autoencoder.get_layer('temporal_autoencoder').get_layer('decoder')
         
         self.reconstruction_loss = MeanSquaredError(name='reconstruction_loss')
-    
+        self.kl_loss = KLDivergence()
+        
     @property
     def metrics(self):
         return [self.reconstruction_loss]
@@ -26,8 +28,10 @@ class DeepTemporalClustering(Model):
         with tf.GradientTape as tape:
             latent_vector, reconstructed_data = self.temporal_autoencoder(inputs)
             reconstruction_loss = tf.sqrt(tf.reduce_sum(tf.square((input - reconstructed_data))))
+            kl_loss = self.kl_loss(input, reconstructed_data)
+            loss = reconstruction_loss + kl_loss
 
-        grads = tape.gradient(reconstruction_loss, self.temporal_autoencoder.trainable_weights)
+        grads = tape.gradient(loss, self.temporal_autoencoder.trainable_weights)
         self.optimizer.apply_gradients(zip(grads, self.temporal_autoencoder.trainable_weights))
 
         # clustering
